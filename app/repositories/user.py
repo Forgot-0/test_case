@@ -20,10 +20,27 @@ class SQLUserRepository:
         stmt = select(UserORM).where(UserORM.email == email).limit(1)
 
         async with self.database.get_read_only_session() as session:
-            user_dto = await session.scalar(stmt)
-            if not user_dto:
+            user = await session.scalar(stmt)
+            if not user:
                 return False
         return True
             
-    async def set_avatar(self, avatar_path) -> None:
-        ...
+    async def get_list(self, filters: dict[str, str]=None, orber_by: str=None) -> list[UserORM] | None:
+        query = select(UserORM)
+
+        if filters:
+            if 'gender' in filters and filters['gender'] != None:
+                query = query.where(UserORM.gender == filters['gender'])
+            if 'first_name' in filters and filters['first_name'] != None:
+                query = query.where(UserORM.first_name.ilike(f"%{filters['first_name']}%"))
+            if 'last_name' in filters and filters['last_name'] != None:
+                query = query.where(UserORM.last_name.ilike(f"%{filters['last_name']}%"))
+
+        if orber_by:
+            query = query.order_by(UserORM.created_at)
+
+        async with self.database.get_read_only_session() as session:
+
+            users: list[UserORM] = await session.scalars(query)
+            if users: return users
+        return None
