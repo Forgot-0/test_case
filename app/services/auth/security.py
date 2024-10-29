@@ -28,4 +28,3 @@ def verify_token(token: str) -> dict:
     payload = jwt.decode(token, settings.api.secret, algorithms=[settings.api.algorithm])
     return payload
 
-

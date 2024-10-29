@@ -1,11 +1,11 @@
 
 from dataclasses import dataclass
 
-from fastapi import Depends, UploadFile
+from fastapi import UploadFile
 
 from api.users.schemas import UserCreateSchema
 from repositories.user import SQLUserRepository
-from services.auth.security import create_access_token, hash_password, oauth2_scheme, verify_password, verify_token
+from services.auth.security import create_access_token, hash_password, verify_password, verify_token
 from services.photo import add_watermark, save_avatar
 
 
@@ -33,7 +33,7 @@ class UserService:
             )
         return users
 
-    async def get_current_user(self, token: str=Depends(oauth2_scheme)):
+    async def get_current_user(self, token: str):
         payload = verify_token(token=token)
         user_id: str = payload.get("id")
 

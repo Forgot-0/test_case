@@ -10,19 +10,28 @@ from db.models.matсh import MatchORM
 class SQLMathcRepository:
     database: Database
 
-    async def create(self, match: MatchORM) -> None:
+    async def create(self, user_one: int, user_two: int) -> None:
+        match = MatchORM(
+            user_one=user_one,
+            user_two=user_two
+        )
         async with self.database.get_session() as session:
             session.add(match)
 
-    async def get_by_user_one(self, user_id: int) -> MatchORM | None:
-        query = select(MatchORM).where(MatchORM.user_one == user_id).limit(1)
+    async def get_by_users(self, user_one_id: int, user_two_id: int) -> MatchORM | None:
+        query_one = select(MatchORM).where(MatchORM.user_one == user_one_id, MatchORM.user_two == user_two_id).limit(1)
+        query_two = select(MatchORM).where(MatchORM.user_one == user_two_id, MatchORM.user_two == user_one_id).limit(1)
+
         async with self.database.get_read_only_session() as session:
-            match = await session.scalar(query)
+            match = await session.scalar(query_one)
             if match:
                 return match
 
-    async def set_user_two(self, match: MatchORM, user_id: int) -> None:
-        match.user_two = user_id
+            match = await session.scalar(query_two)
+            if match:
+                return match
 
+    async def mutually(self, match: MatchORM) -> None:
+        match.mutually = True
         async with self.database.get_session() as session:
             session.add(match)
