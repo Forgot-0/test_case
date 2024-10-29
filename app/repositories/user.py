@@ -17,10 +17,10 @@ class SQLUserRepository:
             session.add(user)
 
     async def check_exsist_email(self, email: str) -> bool:
-        stmt = select(UserORM).where(UserORM.email == email).limit(1)
+        query = select(UserORM).where(UserORM.email == email).limit(1)
 
         async with self.database.get_read_only_session() as session:
-            user = await session.scalar(stmt)
+            user = await session.scalar(query)
             if not user:
                 return False
         return True
@@ -44,3 +44,21 @@ class SQLUserRepository:
             users: list[UserORM] = await session.scalars(query)
             if users: return users
         return None
+
+    async def get_by_id(self, user_id: int) -> UserORM:
+        query = select(UserORM).where(UserORM.id == user_id)
+
+        async with self.database.get_read_only_session() as session:
+            user = await session.scalar(query)
+            if not user:
+                raise
+            return user
+    
+    async def get_by_email(self, email: str) -> UserORM:
+        query = select(UserORM).where(UserORM.email == email)
+
+        async with self.database.get_read_only_session() as session:
+            user = await session.scalar(query)
+            if not user:
+                raise
+            return user

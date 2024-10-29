@@ -72,3 +72,8 @@ class UserFilters(BaseModel):
 
 class UserOrder(BaseModel):
     order_by: str | None = Query(default=None)
+
+
+class TokenOutSchema(BaseModel):
+    access_token: str
+    token_type: str
