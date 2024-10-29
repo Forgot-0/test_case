@@ -10,5 +10,5 @@ def init_app() -> FastAPI:
         debug=True,
     )
 
-    app.include_router(user_router)
+    app.include_router(user_router, prefix='/api')
     return app

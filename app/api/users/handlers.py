@@ -1,9 +1,12 @@
-from fastapi import APIRouter, Body, Depends, File, Form, Query, UploadFile
+from fastapi import APIRouter, Body, Depends, File, UploadFile
+from fastapi.security import OAuth2PasswordRequestForm
 from punq import Container
 
 from api.users.schemas import ListUsersShema, TokenOutSchema, UserCreateSchema, UserFilters, UserOrder, UserShema
 from container.init_containeer import init_container
+from services.match import MatchService
 from services.user import UserService
+from services.auth.security import get_current_user
 
 
 router = APIRouter()
@@ -41,13 +44,22 @@ async def get_users(
 
 @router.post('/login', response_model=TokenOutSchema)
 async def login(
-    email: str=Body(),
-    password: str=Body(),
+    form_data: OAuth2PasswordRequestForm = Depends(),
     container: Container=Depends(init_container)
 ) -> TokenOutSchema:
     user_service: UserService = container.resolve(UserService)
     data = await user_service.login(
-        email=email,
-        password=password,
+        email=form_data.username,
+        password=form_data.password,
     )
     return TokenOutSchema(**data)
+
+
+@router.post('/clients/{id}/match/')
+async def match(
+    id: int,
+    user=Depends(get_current_user),
+    container: Container=Depends(init_container)
+) -> None:
+    match_service: MatchService = container.resolve(MatchService)
+    await match_service.match(user_id=id, user=await user)

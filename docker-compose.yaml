@@ -21,18 +21,6 @@ services:
 
     command: "uvicorn --factory main:init_app --timeout-graceful-shutdown 2 --host 0.0.0.0 --port 8000 --reload"
 
-  migrator:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    restart: "no"
-    depends_on:
-      - db
-    env_file:
-      - ./.env
-    command: alembic upgrade head
-    
-
   db:
     image: postgres:latest
     ports:
@@ -46,6 +34,27 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  pgadmin:
+    image: dpage/pgadmin4
+    ports:
+      - "8080:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: test@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: Frog2005
+    depends_on:
+      - db
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  redis:
+    image: redis:latest
+    container_name: redis_container
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data 
+
 volumes:
   pgdata:
-
+  pgadmin_data:
+  redis_data:

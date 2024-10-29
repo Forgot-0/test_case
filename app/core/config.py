@@ -55,4 +55,3 @@ class Config:
     redis = Redis()
 
 settings = Config()
-print(settings.db.url)

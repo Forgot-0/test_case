@@ -33,14 +33,6 @@ class UserService:
             )
         return users
 
-    async def get_current_user(self, token: str):
-        payload = verify_token(token=token)
-        user_id: str = payload.get("id")
-
-        user = await self.user_repository.get_by_id(user_id=user_id)
-        if user: return user
-        return None
-    
     async def login(self, email: str, password: str) -> dict[str, str]:
         user = await self.user_repository.get_by_email(email=email)
 
@@ -51,4 +43,4 @@ class UserService:
                     "email": user.email
                 }
             )
-            return {'access_token': accses_token, "token_type": "access"}
+            return {'access_token': accses_token, "token_type": "bearer"}

@@ -1,6 +1,6 @@
 from enum import Enum as PythonEnum
 from sqlalchemy import Enum, Float, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.models.base import BaseORM
 from db.models.mixins import CreatedAtMixin
@@ -23,3 +23,6 @@ class UserORM(BaseORM, CreatedAtMixin):
     password_hash: Mapped[str] = mapped_column(String, nullable=False)
     latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+    matches_as_user_one = relationship("MatchORM", foreign_keys="[MatchORM.user_one_id]", back_populates="user_one")
+    matches_as_user_two = relationship("MatchORM", foreign_keys="[MatchORM.user_two_id]", back_populates="user_two")
