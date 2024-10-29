@@ -7,8 +7,10 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from sqlalchemy.util.concurrency import await_only, in_greenlet
 
-# noqa F403
+
 from db.models.user import UserORM
+from db.models.matсh import MatchORM
+
 from db.models.base import BaseORM
 from core.config import settings
 

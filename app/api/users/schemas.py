@@ -1,9 +1,7 @@
 from datetime import datetime
-from enum import Enum
 import json
-from fastapi import Form, HTTPException, Query, status
-from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel, EmailStr, ValidationError, model_validator
+from fastapi import Query
+from pydantic import BaseModel, EmailStr, model_validator
 
 from db.models.user import GenderEnum, UserORM
 
@@ -26,7 +24,7 @@ class UserCreateSchema(BaseModel):
             email=str(self.email),
             first_name=self.first_name,
             last_name=self.last_name,
-            gender=GenderEnum(self.gender),
+            gender=GenderEnum(self.gender).name,
             password_hash=password,
             latitude=self.latitude,
             longitude=self.longitude,
