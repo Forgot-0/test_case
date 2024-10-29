@@ -11,15 +11,18 @@ async def add_watermark(avatar_file: UploadFile) -> BytesIO:
     async with aiofiles.open(watermark_path, 'rb') as f:
         watermark_data = await f.read()
 
-    watermark = Image.open(BytesIO(watermark_data))
+    watermark = Image.open(BytesIO(watermark_data)).convert("RGBA")
+    avatar_image_bytes = await avatar_file.read()
+    avatar_image = Image.open(BytesIO(avatar_image_bytes)).convert("RGBA")
 
-    avatar_image = Image.open(await avatar_file.read()).convert("RGBA")
-    watermark = watermark.resize((avatar_image.width // 5, avatar_image.height // 5), Image.ANTIALIAS)
+    watermark_size = (avatar_image.width // 5, avatar_image.height // 5)
+    watermark = watermark.resize(watermark_size, Image.Resampling.LANCZOS)
 
     avatar_image.paste(watermark, (0, 0), watermark)
     output = BytesIO()
     avatar_image.save(output, format="PNG")
     output.seek(0)
+
     return output
 
 

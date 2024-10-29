@@ -1,5 +1,8 @@
 from enum import Enum
-from pydantic import BaseModel, EmailStr
+import json
+from fastapi import Form, HTTPException, status
+from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel, EmailStr, ValidationError, model_validator
 
 from db.models.user import GenderEnum, UserORM
 
@@ -27,3 +30,10 @@ class UserCreateSchema(BaseModel):
             latitude=self.latitude,
             longitude=self.longitude,
         )
+
+    @model_validator(mode='before')
+    @classmethod
+    def validate_to_json(cls, value):
+        if isinstance(value, str):
+            return cls(**json.loads(value))
+        return value

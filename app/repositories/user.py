@@ -25,3 +25,5 @@ class SQLUserRepository:
                 return False
         return True
             
+    async def set_avatar(self, avatar_path) -> None:
+        ...

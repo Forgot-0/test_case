@@ -15,3 +15,5 @@ class PaginationOutSchema(BaseModel):
 class ListPaginatedResponse(BaseModel, Generic[TListItem]):
     items: list[TListItem]
     pagination: PaginationOutSchema
+
+
