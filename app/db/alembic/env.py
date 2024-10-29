@@ -7,9 +7,10 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 from sqlalchemy.util.concurrency import await_only, in_greenlet
 
-from app.db.models import *  # noqa F403
-from app.db.models.base import BaseORM
-from app.core.config import config as settings
+# noqa F403
+from db.models.user import UserORM
+from db.models.base import BaseORM
+from core.config import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -30,9 +31,7 @@ target_metadata = BaseORM.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-if config.get_main_option("sqlalchemy.url") != settings.db.test_postgres_url:
-    config.set_main_option("sqlalchemy.url", settings.db.url)
-
+config.set_main_option("sqlalchemy.url", settings.db.url)
 
 def include_name(name, type_, parent_names):
     if type_ == "table":

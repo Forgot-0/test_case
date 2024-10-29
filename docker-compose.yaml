@@ -1,0 +1,51 @@
+version: '3.9'
+
+
+services:
+  clone_steam:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    ports: 
+      - "${API_PORT}:8000"
+
+    volumes:
+      - ./app/:/app/
+
+    env_file:
+      - ./.env
+
+    depends_on:
+      - db
+
+    command: "uvicorn --factory main:init_app --timeout-graceful-shutdown 2 --host 0.0.0.0 --port 8000 --reload"
+
+  migrator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: "no"
+    depends_on:
+      - db
+    env_file:
+      - ./.env
+    command: alembic upgrade head
+    
+
+  db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
+

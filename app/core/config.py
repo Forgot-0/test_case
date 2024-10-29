@@ -1,6 +1,7 @@
 from pydantic import Field
 from pydantic_settings import BaseSettings
-
+from dotenv import load_dotenv
+load_dotenv()
 
 
 class Email(BaseSettings):
@@ -18,6 +19,8 @@ class Email(BaseSettings):
 class API(BaseSettings):
     port: int = Field(alias='API_PORT')
     secret: str = Field(alias='SECRET')
+    algorithm: str = Field(alias='ALGORITHM')
+    watermark_path: str = Field(alias='WATERMAKR_PATH')
 
 
 class DataBase(BaseSettings):
@@ -29,8 +32,8 @@ class DataBase(BaseSettings):
 
     @property
     def url(self) -> str:
-        ...
- 
+        return f"postgresql+asyncpg://{self.username}:{self.password}@{self.host}:{self.port}/{self.db}"
+
     @property
     def test_postgres_db(self) -> str:
         return f"test_{self.db}"
@@ -51,4 +54,5 @@ class Config:
     email = Email()
     redis = Redis()
 
-config = Config()
+settings = Config()
+print(settings.db.url)

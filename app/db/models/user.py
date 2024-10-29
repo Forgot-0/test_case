@@ -1,11 +1,9 @@
-from datetime import datetime
 from enum import Enum as PythonEnum
-from xmlrpc.client import DateTime
 from sqlalchemy import Enum, Float, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.models.base import BaseORM
-from app.db.models.mixins import CreatedAtMixin
+from db.models.base import BaseORM
+from db.models.mixins import CreatedAtMixin
 
 
 class GenderEnum(PythonEnum):
@@ -25,4 +23,3 @@ class UserORM(BaseORM, CreatedAtMixin):
     password_hash: Mapped[str] = mapped_column(String, nullable=False)
     latitude: Mapped[float | None] = mapped_column(Float, nullable=True)
     longitude: Mapped[float | None] = mapped_column(Float, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now())
