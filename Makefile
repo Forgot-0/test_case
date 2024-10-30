@@ -1,10 +1,15 @@
 .PHONY: all
 
-BACKEND_APP = docker_compose/app.yaml
+APP_UP=docker-compose.yaml
 SHELL=/bin/bash -e
-STORAGES=docker_compose/storage.yaml
 ENV = --env-file .env
 
+
+app_up:
+	docker-compose up -d --build
+
+app_down:
+	docker-compose down
 
 migrate:
 	alembic upgrade head
