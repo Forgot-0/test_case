@@ -34,17 +34,15 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  pgadmin:
-    image: dpage/pgadmin4
-    ports:
-      - "8080:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: test@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: Frog2005
+  alembic:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    command: alembic upgrade head
     depends_on:
       - db
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
 
   redis:
     image: redis:latest

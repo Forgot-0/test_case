@@ -29,13 +29,13 @@ class SQLUserRepository:
         query = select(UserORM).where(UserORM.id != user.id)
 
         if filters:
-            if 'gender' in filters and filters['gender'] != None:
+            if 'gender' in filters and filters['gender'] is not None:
                 query = query.where(UserORM.gender == filters['gender'])
-            if 'first_name' in filters and filters['first_name'] != None:
+            if 'first_name' in filters and filters['first_name'] is not None:
                 query = query.where(UserORM.first_name.ilike(f"%{filters['first_name']}%"))
-            if 'last_name' in filters and filters['last_name'] != None:
+            if 'last_name' in filters and filters['last_name'] is not None:
                 query = query.where(UserORM.last_name.ilike(f"%{filters['last_name']}%"))
-            if 'max_distance' in filters and filters['max_distance'] != None:
+            if 'max_distance' in filters and filters['max_distance'] is not None:
                 query = query.where(
                     func.ST_DistanceSphere(UserORM.location, user.location) <= filters['max_distance']
                 )
@@ -61,4 +61,4 @@ class SQLUserRepository:
 
         async with self.database.get_read_only_session() as session:
             user = await session.scalar(query)
-            if not user: return user
+            if user: return user

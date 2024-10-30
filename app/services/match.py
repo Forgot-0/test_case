@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 
 from redis.asyncio import Redis
 
@@ -15,10 +16,13 @@ from services.email import EmailService
 class LimitMatchService:
     redis: Redis
 
-    async def get_or_create(self, user_id: int, expire_time: int=3600) -> int:
+    async def get_or_create(self, user_id: int) -> int:
         current_limit = await self.redis.get(user_id)
 
         if current_limit is None:
+            now = datetime.now()
+            end_of_day = datetime.combine(now.date() + timedelta(days=1), datetime.min)
+            expire_time = int((end_of_day - now).total_seconds())
             await self.redis.set(user_id, 1, ex=expire_time)
             return 1
 

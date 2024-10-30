@@ -80,7 +80,6 @@ class UserService:
 
     async def login(self, email: str, password: str) -> dict[str, str]:
         user = await self.user_repository.get_by_email(email=email)
-
         if verify_password(password, user.password_hash):
             accses_token = create_access_token(
                 data={
