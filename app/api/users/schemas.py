@@ -7,10 +7,7 @@ from db.models.user import GenderEnum, UserORM
 
 
 
-
-
-
-class UserCreateSchema(BaseModel):
+class UserCreateInSchema(BaseModel):
     email: EmailStr
     first_name: str
     last_name: str
@@ -26,8 +23,7 @@ class UserCreateSchema(BaseModel):
             last_name=self.last_name,
             gender=GenderEnum(self.gender).name,
             password_hash=password,
-            latitude=self.latitude,
-            longitude=self.longitude,
+            location=f"POINT({self.latitude} {self.longitude})",
         )
 
     @model_validator(mode='before')
@@ -37,32 +33,21 @@ class UserCreateSchema(BaseModel):
             return cls(**json.loads(value))
         return value
 
-class UserShema(BaseModel):
+class UserOutShema(BaseModel):
     email: EmailStr
     first_name: str
     last_name: str
+    avatar: str | None
     gender: str
-    latitude: float
-    longitude: float
     created_at: datetime
 
-    @classmethod
-    def from_ormModel(cls, user_orm: UserORM) -> 'UserShema':
-        return cls(
-            email=user_orm.email,
-            first_name=user_orm.first_name,
-            last_name=user_orm.last_name,
-            gender=user_orm.gender.value,
-            latitude=user_orm.latitude,
-            longitude=user_orm.longitude,
-            created_at=user_orm.created_at
-        )
 
-class ListUsersShema(BaseModel):
-    users: list[UserShema] | None
+class ListUsersOutShema(BaseModel):
+    users: list[UserOutShema] | None
 
 
 class UserFilters(BaseModel):
+    max_distance: float = Query(default=10.0)
     gender: str | None = Query(default=None)
     first_name: str | None = Query(default=None)
     last_name: str | None = Query(default=None)

@@ -14,6 +14,6 @@ class MatchORM(BaseORM, CreatedAtMixin):
 
     mutually: Mapped[bool] = mapped_column(Boolean, default=False)
 
-
+    index_user_one_two = Index('idx_user_one_two', user_one_id, user_two_id, unique=True)
     user_one = relationship("UserORM", foreign_keys=[user_one_id], back_populates="matches_as_user_one")
     user_two = relationship("UserORM", foreign_keys=[user_two_id], back_populates="matches_as_user_two")

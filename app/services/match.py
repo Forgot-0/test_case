@@ -5,6 +5,7 @@ from redis.asyncio import Redis
 from db.models.user import UserORM
 from repositories.matсh import SQLMathcRepository
 from repositories.user import SQLUserRepository
+from services.email import EmailService
 
 
 
@@ -30,8 +31,9 @@ class MatchService:
     user_repository: SQLUserRepository
     mathc_repositpry: SQLMathcRepository
     limit_service: LimitMatchService
+    email_service: EmailService
 
-    async def match(self, user_id: int, user: UserORM) -> None:
+    async def match(self, user_id: int, user: UserORM) -> str | None:
         if user_id == user.id:
             raise
 
@@ -39,6 +41,7 @@ class MatchService:
         
         if count > 10:
             raise
+
         await self.limit_service.incr_limit(user_id=user.id)
 
         user_two = await self.user_repository.get_by_id(user_id=user_id)
@@ -54,7 +57,10 @@ class MatchService:
 
             if match.user_two_id == user.id:
                 await self.mathc_repositpry.mutually(match=match)
-                return
+
+                await self.email_service.send_email(user_from=user, user_to=user_two)
+                await self.email_service.send_email(user_from=user_two, user_to=user)
+                return user_two.email
             raise
 
         await self.mathc_repositpry.create(

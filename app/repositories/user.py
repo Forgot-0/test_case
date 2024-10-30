@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 
 from db.database import Database
@@ -25,8 +25,8 @@ class SQLUserRepository:
                 return False
         return True
             
-    async def get_list(self, filters: dict[str, str]=None, orber_by: str=None) -> list[UserORM] | None:
-        query = select(UserORM)
+    async def get_list(self, user: UserORM, filters: dict[str, str]=None, orber_by: str=None) -> list[UserORM] | None:
+        query = select(UserORM).where(UserORM.id != user.id)
 
         if filters:
             if 'gender' in filters and filters['gender'] != None:
@@ -35,6 +35,10 @@ class SQLUserRepository:
                 query = query.where(UserORM.first_name.ilike(f"%{filters['first_name']}%"))
             if 'last_name' in filters and filters['last_name'] != None:
                 query = query.where(UserORM.last_name.ilike(f"%{filters['last_name']}%"))
+            if 'max_distance' in filters and filters['max_distance'] != None:
+                query = query.where(
+                    func.ST_DistanceSphere(UserORM.location, user.location) <= filters['max_distance']
+                )
 
         if orber_by:
             query = query.order_by(UserORM.created_at)

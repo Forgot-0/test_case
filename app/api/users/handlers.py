@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, Depends, File, UploadFile
 from fastapi.security import OAuth2PasswordRequestForm
 from punq import Container
 
-from api.users.schemas import ListUsersShema, TokenOutSchema, UserCreateSchema, UserFilters, UserOrder, UserShema
+from api.users.schemas import ListUsersOutShema, TokenOutSchema, UserCreateInSchema, UserFilters, UserOrder, UserOutShema
 from container.init_containeer import init_container
 from services.match import MatchService
 from services.user import UserService
@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.post("/clients/create/", response_model=None)
 async def create_user(
-    user_schema: UserCreateSchema=Body(...),
+    user_schema: UserCreateInSchema=Body(...),
     avatar:UploadFile=File(...),
     container: Container=Depends(init_container)
 ) -> None:
@@ -24,22 +24,24 @@ async def create_user(
         avatar_file=avatar
     )
 
-
-@router.get("/list", response_model=ListUsersShema)
+@router.get("/list", response_model=ListUsersOutShema | str)
 async def get_users(
     filters: UserFilters=Depends(UserFilters),
     order_by: UserOrder=Depends(UserOrder),
+    user=Depends(get_current_user),
     container: Container=Depends(init_container)
-) -> ListUsersShema:
+) -> ListUsersOutShema | str:
     user_service: UserService = container.resolve(UserService)
 
     user_list = await user_service.get_all(
+        user=await user,
         filters=filters.model_dump(), 
-        order_by=order_by.order_by
+        order_by=order_by.order_by,
     )
 
-    return ListUsersShema(
-        users=[UserShema.from_ormModel(user) for user in user_list]
+    if isinstance(user_list, str): return user_list
+    return ListUsersOutShema(
+        users=[UserOutShema(**user) for user in user_list]
     )
 
 @router.post('/login', response_model=TokenOutSchema)
@@ -60,6 +62,7 @@ async def match(
     id: int,
     user=Depends(get_current_user),
     container: Container=Depends(init_container)
-) -> None:
+) -> str | None:
     match_service: MatchService = container.resolve(MatchService)
-    await match_service.match(user_id=id, user=await user)
+    email = await match_service.match(user_id=id, user=await user)
+    if email: return email
