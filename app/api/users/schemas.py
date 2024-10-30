@@ -11,7 +11,7 @@ class UserCreateInSchema(BaseModel):
     email: EmailStr
     first_name: str
     last_name: str
-    gender: str
+    gender: GenderEnum
     password: str
     latitude: float
     longitude: float

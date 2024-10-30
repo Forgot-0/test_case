@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from redis.asyncio import Redis
 
 from db.models.user import UserORM
+from exeptions.match import LimitMatchExeption, MatchAlreadyExeption, MutuallyAlreadyException, MutuallySelfExeption
+from exeptions.user import NotFoundUserExeption
 from repositories.matсh import SQLMathcRepository
 from repositories.user import SQLUserRepository
 from services.email import EmailService
@@ -35,16 +37,19 @@ class MatchService:
 
     async def match(self, user_id: int, user: UserORM) -> str | None:
         if user_id == user.id:
-            raise
+            raise MutuallySelfExeption()
 
         count = await self.limit_service.get_or_create(user_id=user.id)
         
         if count > 10:
-            raise
+            raise LimitMatchExeption()
 
         await self.limit_service.incr_limit(user_id=user.id)
 
         user_two = await self.user_repository.get_by_id(user_id=user_id)
+
+        if not user_two:
+            raise NotFoundUserExeption(user_id=user_id)
 
         match = await self.mathc_repositpry.get_by_users(
             user_one_id=user_id,
@@ -53,7 +58,7 @@ class MatchService:
 
         if match:
             if match.mutually:
-                raise
+                raise MutuallyAlreadyException()
 
             if match.user_two_id == user.id:
                 await self.mathc_repositpry.mutually(match=match)
@@ -61,7 +66,7 @@ class MatchService:
                 await self.email_service.send_email(user_from=user, user_to=user_two)
                 await self.email_service.send_email(user_from=user_two, user_to=user)
                 return user_two.email
-            raise
+            raise MatchAlreadyExeption()
 
         await self.mathc_repositpry.create(
             user_one=user,

@@ -8,7 +8,7 @@ from db.models.base import BaseORM
 from db.models.mixins import CreatedAtMixin
 
 
-class GenderEnum(PythonEnum):
+class GenderEnum(str, PythonEnum):
     MALE = "male"
     FEMALE = "female"
 

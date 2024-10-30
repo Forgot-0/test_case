@@ -49,20 +49,16 @@ class SQLUserRepository:
             if users: return users
         return None
 
-    async def get_by_id(self, user_id: int) -> UserORM:
+    async def get_by_id(self, user_id: int) -> UserORM | None:
         query = select(UserORM).where(UserORM.id == user_id)
 
         async with self.database.get_read_only_session() as session:
             user = await session.scalar(query)
-            if not user:
-                raise
-            return user
+            if user: return user
     
-    async def get_by_email(self, email: str) -> UserORM:
+    async def get_by_email(self, email: str) -> UserORM | None:
         query = select(UserORM).where(UserORM.email == email)
 
         async with self.database.get_read_only_session() as session:
             user = await session.scalar(query)
-            if not user:
-                raise
-            return user
+            if not user: return user

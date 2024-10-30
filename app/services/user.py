@@ -8,6 +8,7 @@ from redis.asyncio import Redis
 
 from api.users.schemas import UserCreateInSchema
 from db.models.user import UserORM
+from exeptions.user import EmailAlreadyExistExeption, WrongPasswordExeption
 from repositories.user import SQLUserRepository
 from services.auth.security import create_access_token, hash_password, verify_password
 from services.photo import save_avatar
@@ -46,7 +47,7 @@ class UserService:
 
     async def create_user(self, user_schema: UserCreateInSchema, avatar_file: UploadFile) -> None:
         if await self.user_repository.check_exsist_email(email=user_schema.email):
-            raise
+            raise EmailAlreadyExistExeption(email=user_schema.email)
 
         password = hash_password(password=user_schema.password)
 
@@ -88,3 +89,4 @@ class UserService:
                 }
             )
             return {'access_token': accses_token, "token_type": "bearer"}
+        raise WrongPasswordExeption()
